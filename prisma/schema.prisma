@@ -13,97 +13,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  role     String
+}
+
 model Field {
-  field_code     String @id
-  extent_size    String
-  field_location String
-  field_name     String
-  img_01         String @db.LongText
-  img_02         String @db.LongText
+  fieldCode     String @id
+  fieldName     String
+  fieldLocation String
+  fieldSize     String
+  fieldImage1   String
+
+  cropCode String?
+  crop     Crop?   @relation(fields: [cropCode], references: [cropCode], onDelete: Cascade, onUpdate: Cascade)
+
+  staff      Staff[]
+  equipments Equipment[]
+  logs       Log[]
+}
+
+model Crop {
+  cropCode       String  @id
+  commonName     String
+  scientificName String
+  image          String
+  category       String
+  season         String
+  logs           Log[]
+  fields         Field[]
 }
 
 model Staff {
-  staff_id    String @id
-  address_01  String
-  address_02  String
-  address_03  String
-  address_04  String
-  address_05  String
+  staffId     String   @id
+  firstName   String
+  lastName    String
+  address     String
   designation String
-  dob         String
-  email       String
-  first_name  String
   gender      String
-  joined_date String
-  last_name   String
-  phone_no    String
-  role        String
-  field_code  String
-}
+  contact     String
+  email       String
+  vehicleId   String?
+  vehicle     Vehicle? @relation(fields: [vehicleId], references: [vehicleId], onDelete: Cascade, onUpdate: Cascade)
 
-model Crops {
-  crop_code       String @id
-  category        String
-  common_name     String
-  img             String @db.LongText
-  scientific_name String
-  season          String
-  field_code      String
-}
+  fieldCode String
+  field     Field  @relation(fields: [fieldCode], references: [fieldCode], onDelete: Cascade, onUpdate: Cascade)
 
-model Vehicle {
-  vehicle_code     String @id
-  email            String
-  first_name       String
-  fuel_type        String
-  license_plate    String
-  phone_no         String
-  remarks          String
-  role             String
-  status           String
-  vehicle_category String
-  staff_id         String
+  logs StaffLog[]
 }
 
 model Equipment {
-  eq_code        String @id
-  field_location String
-  field_name     String
-  first_name     String
-  name           String
-  phone_no       String
-  role           String
-  status         String
-  type           String
-  field_code     String
-  staff_id       String
+  equipmentId     String @id
+  equipmentName   String
+  equipmentType   String
+  equipmentStatus String
+  fieldCode       String
+  field           Field  @relation(fields: [fieldCode], references: [fieldCode], onDelete: Cascade, onUpdate: Cascade)
 }
 
-model Field_Logs {
-  log_code       String @id
-  details        String
-  img            String @db.LongText
-  log_date       String
-  field_location String
-  field_name     String
-  field_code     String
+model Vehicle {
+  vehicleId     String  @id
+  type          String
+  model         String
+  licensePlate  String
+  assignedStaff Staff[]
 }
 
-model Crop_Logs {
-  log_code  String @id
-  details   String
-  img       String @db.LongText
-  log_date  String
-  crop_name String
-  crop_code String
+model Log {
+  logCode       String @id
+  logDate       String
+  logDetails    String
+  observedImage String
+  fieldCode     String
+  cropCode      String
+
+  field Field @relation(fields: [fieldCode], references: [fieldCode], onDelete: Cascade, onUpdate: Cascade)
+  crop  Crop  @relation(fields: [cropCode], references: [cropCode], onDelete: Cascade, onUpdate: Cascade)
+
+  staffLogs StaffLog[]
 }
 
-model Staff_Logs {
-  log_code   String @id
-  details    String
-  img        String @db.LongText
-  log_date   String
-  first_name String
-  phone_no   String
-  staff_id   String
+model StaffLog {
+  staffId String
+  logCode String
+
+  staff Staff @relation(fields: [staffId], references: [staffId], onDelete: Cascade, onUpdate: Cascade)
+  log   Log   @relation(fields: [logCode], references: [logCode], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([staffId, logCode])
 }
